@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Scanner;
 
 public class FileReader {
-    public static List<String[]> read (){
+    public static List<String[]> read (String fileName){
         List<String[]> mapEntities = new ArrayList<>();
         try {
-            File myObj = new File("src/resources/TreasureMap.txt");
-            Scanner myReader = new Scanner(myObj);
+            File filePath = new File("src/resources/" + fileName);
+            Scanner myReader = new Scanner(filePath);
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 mapEntities.add(Parser.parse(data, " - "));

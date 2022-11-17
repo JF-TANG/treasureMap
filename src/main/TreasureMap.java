@@ -11,35 +11,47 @@ public class TreasureMap {
     Map<Position, Treasure> treasures = new HashMap<>();
     List<Adventurer> adventurers = new ArrayList<>();
 
+    public Position getMapBorder() {
+        return mapBorder;
+    }
+
+    public Map<Position, Mountain> getMountains() {
+        return mountains;
+    }
+
+    public Map<Position, Treasure> getTreasures() {
+        return treasures;
+    }
+
+    public List<Adventurer> getAdventurers() {
+        return adventurers;
+    }
+
     public TreasureMap(List<String[]> mapInfos) {
         for (String[] mapInfo : mapInfos) {
             switch (mapInfo[0]) {
                 case "C" -> mapBorder = new Position(Integer.parseInt(mapInfo[1]), Integer.parseInt(mapInfo[2]));
-                case "M" -> mountains.put(new Position(Integer.parseInt(mapInfo[1]), Integer.parseInt(mapInfo[2])), new Mountain());
-                case "T" -> treasures.put(new Position(Integer.parseInt(mapInfo[1]), Integer.parseInt(mapInfo[2])), new Treasure(Integer.parseInt(mapInfo[3])));
-                case "A" -> adventurers.add(new Adventurer(mapInfo[1], new Position(Integer.parseInt(mapInfo[2]), Integer.parseInt(mapInfo[3])), mapInfo[4],
-                        Parser.parse(mapInfo[5], "")));
+                case "M" ->
+                        mountains.put(new Position(Integer.parseInt(mapInfo[1]), Integer.parseInt(mapInfo[2])), new Mountain());
+                case "T" ->
+                        treasures.put(new Position(Integer.parseInt(mapInfo[1]), Integer.parseInt(mapInfo[2])), new Treasure(Integer.parseInt(mapInfo[3])));
+                case "A" -> {
+                    if (mapInfo.length > 6) {
+                        adventurers.add(new Adventurer(mapInfo[1], new Position(Integer.parseInt(mapInfo[2]), Integer.parseInt(mapInfo[3])), mapInfo[4], Parser.parse(mapInfo[5], ""), Integer.parseInt(mapInfo[6])));
+                    } else {
+                        adventurers.add(new Adventurer(mapInfo[1], new Position(Integer.parseInt(mapInfo[2]), Integer.parseInt(mapInfo[3])), mapInfo[4], Parser.parse(mapInfo[5], "")));
+                    }
+                }
+
             }
         }
 
     }
 
-    public void start() {
-
-        int max = 0;
-        for (Adventurer adventurer : adventurers) {
-            if (adventurer.movements.size() > max) {
-                max = adventurer.movements.size();
-            }
-        }
-
-        for (int i = 0; i < max; i++) {
-            for (Adventurer adventurer : adventurers) {
-                if (!adventurer.movements.isEmpty()) {
-                    move(adventurer);
-                }
-            }
-        }
+    public boolean hasCollision(Position pos) {
+        return pos.posX < 0 || pos.posY < 0 || pos.posX > mapBorder.posX || pos.posY > mapBorder.posY ||
+                mountains.containsKey(pos) ||
+                adventurers.stream().filter(e -> e.position.equals(pos)).count() > 1;
     }
 
     public void move(Adventurer adventurer) {
@@ -82,15 +94,22 @@ public class TreasureMap {
         adventurer.movements.remove(0);
     }
 
-    public boolean hasCollision(Position pos) {
-        if (
-                pos.posX < 0 || pos.posY < 0 || pos.posX > mapBorder.posX || pos.posY > mapBorder.posY ||
-                        mountains.containsKey(pos)
-        ) {
-            long count = adventurers.stream().filter(e -> e.position.equals(pos)).count();
-            return count > 1;
+    public void start() {
+
+        int max = 0;
+        for (Adventurer adventurer : adventurers) {
+            if (adventurer.movements.size() > max) {
+                max = adventurer.movements.size();
+            }
         }
-        return false;
+
+        for (int i = 0; i < max; i++) {
+            for (Adventurer adventurer : adventurers) {
+                if (!adventurer.movements.isEmpty()) {
+                    move(adventurer);
+                }
+            }
+        }
     }
 
     @Override
@@ -110,7 +129,7 @@ public class TreasureMap {
         }
 
         for (Map.Entry<Position, Treasure> entry : treasures.entrySet()) {
-            if (entry.getValue().numberOfChestsLeft > 0){
+            if (entry.getValue().numberOfChestsLeft > 0) {
                 txt += "\nT - " + entry.getKey().posX + " - " + entry.getKey().posY + " - " + entry.getValue().numberOfChestsLeft;
             }
         }

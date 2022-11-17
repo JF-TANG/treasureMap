@@ -5,15 +5,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileWriter {
-    public static void generateFile(String text) throws IOException {
+    public static void generateFile(String text, String filename) throws IOException {
         // Defining the file name of the file
-        Path fileName = Path.of("src/resources/TreasureMapEnd.txt");
+        Path filePath = Path.of("src/resources/" + filename);
 
         // Writing into the file
-        Files.writeString(fileName, text);
+        Files.writeString(filePath, text);
 
         // Reading the content of the file
-        String file_content = Files.readString(fileName);
+        String file_content = Files.readString(filePath);
 
         // Printing the content inside the file
         System.out.println(file_content);
